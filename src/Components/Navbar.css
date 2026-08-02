@@ -1,0 +1,60 @@
+/* Navbar Container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 48px;
+  background-color: var(--bg-cream, #FFFBF5);
+}
+
+/* Logo Brand Link */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-icon {
+  background-color: var(--purple-light, #F2E8FF);
+  padding: 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.brand-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.brand-title-top {
+  color: var(--purple-accent, #B17DFF);
+}
+
+.brand-title-bottom {
+  color: var(--coral-accent, #E56B6F);
+}
+
+/* + New Post Button */
+.btn-new-post {
+  background-color: var(--purple-accent, #B17DFF);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-new-post:hover {
+  background-color: var(--purple-hover, #9E62FF);
+}
