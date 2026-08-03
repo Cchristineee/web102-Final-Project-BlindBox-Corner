@@ -16,7 +16,7 @@ export default function HomeFeed() {
     testConnection(); 
   }, [sortBy]);
 
-  // Test Supabase connection helper
+  // Testing Supabase connection helper function
   async function testConnection() {
     const { data, error } = await supabase.from('posts').select('*');
     if (error) {
