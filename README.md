@@ -88,7 +88,31 @@ GIFs created with LiceCap
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+The final project was really fun and had just the right amount of challenges: 
+
+### 1. Handling Supabase Row-Level Security (RLS) & Database Constraints
+I think I had this issue at a previous project but When testing my post creation form, I kept getting hit with a red browser alert saying new row violates row-level security policy. 
+<br>
+**Solution:**
+It took me a minute to realize Supabase locks down new PostgreSQL tables by default. I resolved it by setting up public read, insert, and update policies in the SQL Editor so users can freely create posts, upvote, and comment without needing full account auth. 
+
+### 2. Keeping the Home Feed Clean vs. Rubric Rules
+The project rubric strictly required that the home feed only show the post title, timestamp, flag, and upvote count—meaning no body text or images until you actually click into the post. 
+<br>
+**Solution:**
+I had to be careful with my component structure to make sure PostCard stayed super lightweight and didn't render extra content, while still letting the Homepage handle real-time search filtering and sorting (Latest vs. Top Voted).
+
+### 3. Accidentally Pushing .env Secrets to GitHub!:
+Early on, I accidentally committed my local .env file with my Supabase keys to GitHub.
+<br>
+**Solution:**
+Once I realized it, I jumped into the Supabase dashboard to revoke and roll a fresh API key right away. Then I used git rm --cached to untrack the file, added .env to my .gitignore, and pushed the clean state back up so credentials won't leak again. 😮‍💨
+
+### 3. Handling Database Cleanup with Foreign Keys:
+Finally, I wanted to make sure that deleting a post didn't leave orphan comments floating around in the database.
+<br>
+**Solution:**
+I set up the comments table with ON DELETE CASCADE linked to the post ID, so whenever a post is removed from either the detail page or the edit form, Supabase automatically cleans up all associated comments in one smooth operation.
 
 ## License
 
