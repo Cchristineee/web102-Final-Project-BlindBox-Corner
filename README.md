@@ -69,14 +69,22 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+## ✨ Site Overview ✨
+<img width="1425" height="710" alt="Blind Box Corner (View)" src="https://github.com/user-attachments/assets/d445aa00-e79e-4d4c-bc85-4a80c0cac51f" />
 
-<!-- Replace this with whatever GIF tool you used! -->
-GIF created with ...  
-<!-- Recommended tools:
-[Kap](https://getkap.co/) for macOS
-[ScreenToGif](https://www.screentogif.com/) for Windows
-[peek](https://github.com/phw/peek) for Linux. -->
+## ✨ Creating a new Post ✨
+<img width="1425" height="710" alt="Blind Box Corner (Create Post)" src="https://github.com/user-attachments/assets/7188e0fc-23ab-42e3-8804-1bfbee8ca84b" />
+
+## ✨ Edit Post ✨
+<img width="1425" height="710" alt="Blind Box Corner (Edit Post)" src="https://github.com/user-attachments/assets/4f339f97-54f7-43c2-85b9-f0bd13495b46" />
+
+## ✨ Delete Post ✨
+<img width="1425" height="710" alt="Blind Box Corner (Delete Post)" src="https://github.com/user-attachments/assets/8e307b3e-4eff-4148-95f1-a3c5d2fea9f1" />
+
+## ✨ Leaving Comments Underneath Post & Liking ✨
+<img width="1425" height="710" alt="Blind Box Corner (Comment + Like Post)" src="https://github.com/user-attachments/assets/35ea359b-bee9-4ce1-a1d3-199e5ab63ce9" />
+
+GIFs created with LiceCap
 
 ## Notes
 
