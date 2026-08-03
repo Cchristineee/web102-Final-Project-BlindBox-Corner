@@ -52,6 +52,23 @@ export default function PostDetail() {
       .eq('id', id);
   }
 
+  // Handling direct deletion from post page
+  async function handleDeletePost() {
+    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert(`Error deleting post: ${error.message}`);
+    } else {
+      navigate('/');
+    }
+  }
+
   // Adding new comment to the post
   async function handleAddComment(e) {
     e.preventDefault();
@@ -81,13 +98,67 @@ export default function PostDetail() {
 
       {/* Main Post Container Card */}
       <div style={{ background: '#FFF', padding: '40px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)' }}>
-        {/* Flag Badge & Actions */}
+        {/* Flag Badge & Action Buttons Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          {post.flag && <span className="flag-badge">{post.flag}</span>}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          {post.flag ? <span className="flag-badge">{post.flag}</span> : <div />}
+          
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {/* Edit Icon Button (Navigates to /edit/:id) */}
+            <Link 
+              to={`/edit/${post.id}`} 
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                border: '1px solid var(--border-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textDecoration: 'none',
+                background: '#FFF',
+                color: 'var(--purple-accent)',
+                fontSize: '0.9rem'
+              }}
+              title="Edit Post"
+            >
+              ✏️
+            </Link>
+
+            {/* Delete Icon Button (Deletes directly) */}
+            <button
+              onClick={handleDeletePost}
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '50%',
+                border: '1px solid #FFD1D7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#FFF0F3',
+                cursor: 'pointer',
+                fontSize: '0.9rem'
+              }}
+              title="Delete Post"
+            >
+              🗑️
+            </button>
+
+            {/* Upvote Pill Button */}
             <button 
               onClick={handleUpvote} 
-              style={{ background: '#FFF0F3', color: 'var(--coral-accent)', border: 'none', padding: '8px 16px', borderRadius: '999px', fontWeight: '600', cursor: 'pointer' }}
+              style={{ 
+                background: '#FFF0F3', 
+                color: 'var(--coral-accent)', 
+                border: 'none', 
+                padding: '8px 16px', 
+                borderRadius: '999px', 
+                fontWeight: '600', 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
             >
               ♡ {post.upvotes || 0}
             </button>
@@ -100,7 +171,7 @@ export default function PostDetail() {
           Posted on {new Date(post.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
         </p>
         
-        {/* Img Display */}
+        {/* Image Display */}
         {post.image_url && (
           <div style={{ marginBottom: '24px', textAlign: 'center', background: 'linear-gradient(135deg, #FFF0F3 0%, #F3E8FF 100%)', padding: '20px', borderRadius: '16px' }}>
             <img 
