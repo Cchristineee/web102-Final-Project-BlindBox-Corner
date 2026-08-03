@@ -2,9 +2,9 @@
 
 Submitted by: **Christine Grimadeau**
 
-This web app: **Blind Box Corner**
+This web app: **Blind Box Corner** is a feature-rich, single-page forum application built for collectors of vinyl art toys, blind boxes, and minifigures. Users can post their latest unboxings, share trade requests, filter community posts by tags, interact through upvotes and comments, and manage their submissions.
 
-Time spent: **45** hours spent in total
+Time spent: **48** hours spent in total
 
 ## Required Features
 
