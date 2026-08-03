@@ -1,4 +1,4 @@
-# Web Development Final Project - *HobbyHub*
+# Web Development Final Project - *HobbyHub (Blind Box Corner)*
 
 Submitted by: **Christine Grimadeau**
 
@@ -84,7 +84,7 @@ Describe any challenges encountered while building the app.
 
 ## License
 
-    Copyright [yyyy] [name of copyright owner]
+    Copyright [2026] [Christine Grimadeau]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
