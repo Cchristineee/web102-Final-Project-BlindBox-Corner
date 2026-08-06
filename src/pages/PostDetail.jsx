@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../client';
-import SecretKeyModal from '../components/SecretKeyModal';
+import SecretKeyModal from '../Components/SecretKeyModal';
 
 export default function PostDetail() {
   const { id } = useParams();
