@@ -11,6 +11,8 @@ export default function EditPost() {
   const [flag, setFlag] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [postSecretKey, setPostSecretKey] = useState(''); 
+  const [inputSecretKey, setInputSecretKey] = useState('');
   const [loading, setLoading] = useState(true);
 
   const flags = ['✨ Secret Found', '📦 Haul Showcase', '🔍 ISO / Trade', '🎀 Display Setup', '❓ Question'];
@@ -34,6 +36,7 @@ export default function EditPost() {
       setFlag(postData.flag || '');
       setContent(postData.content || '');
       setImageUrl(postData.image_url || '');
+      setPostSecretKey(postData.secret_key || '');
     }
     setLoading(false);
   }
@@ -41,6 +44,12 @@ export default function EditPost() {
   // Handling update to post 
   async function handleUpdate(e) {
     e.preventDefault();
+
+    // Verify secret key input against the state
+    if (inputSecretKey !== postSecretKey) {
+      alert('Incorrect secret key! You do not have permission to edit this post.');
+      return;
+    }
 
     const { error } = await supabase
       .from('posts')
@@ -61,8 +70,12 @@ export default function EditPost() {
 
   // Handling deletion of post
   async function handleDelete() {
-    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
-    if (!confirmDelete) return;
+    const enteredKey = window.prompt('Enter your secret key to confirm post deletion:');
+    
+    if (enteredKey !== postSecretKey) {
+      alert('Incorrect secret key! Deletion cancelled.');
+      return;
+    }
 
     const { error } = await supabase
       .from('posts')
