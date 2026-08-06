@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../client';
+import SecretKeyModal from '../components/SecretKeyModal';
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -10,6 +11,11 @@ export default function PostDetail() {
   const [newComment, setNewComment] = useState('');
   const [commentSecretKey, setCommentSecretKey] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Modal State Management
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState(null); // 'DELETE_POST' or 'DELETE_COMMENT'
+  const [targetComment, setTargetComment] = useState(null); // stores { id, secret_key }
 
   useEffect(() => {
     fetchPostAndComments();
@@ -42,6 +48,56 @@ export default function PostDetail() {
     setLoading(false);
   }
 
+  // Open modal for post deletion
+  function triggerPostDelete() {
+    setModalAction('DELETE_POST');
+    setIsModalOpen(true);
+  }
+
+  // Open modal for comment deletion
+  function triggerCommentDelete(commentId, originalKey) {
+    setTargetComment({ id: commentId, secret_key: originalKey });
+    setModalAction('DELETE_COMMENT');
+    setIsModalOpen(true);
+  }
+
+  // Process key input from SecretKeyModal
+  async function handleModalSubmit(enteredKey) {
+    setIsModalOpen(false);
+
+    if (modalAction === 'DELETE_POST') {
+      if (enteredKey !== post.secret_key) {
+        alert('Incorrect secret key! Deletion cancelled.');
+        return;
+      }
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert(`Error deleting post: ${error.message}`);
+      } else {
+        navigate('/');
+      }
+    } else if (modalAction === 'DELETE_COMMENT') {
+      if (enteredKey !== targetComment.secret_key) {
+        alert('Incorrect secret key! You can only delete your own comments.');
+        return;
+      }
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', targetComment.id);
+
+      if (error) {
+        alert(`Error deleting comment: ${error.message}`);
+      } else {
+        setComments(comments.filter((c) => c.id !== targetComment.id));
+      }
+    }
+  }
+
   // Handling upvotes
   async function handleUpvote() {
     const updatedCount = (post.upvotes || 0) + 1;
@@ -51,29 +107,6 @@ export default function PostDetail() {
       .from('posts')
       .update({ upvotes: updatedCount })
       .eq('id', id);
-  }
-
-  // Direct post deletion requiring secret key prompt
-  async function handleDeletePost() {
-    const enteredKey = window.prompt('Enter the secret key to delete this post:');
-    
-    if (!enteredKey) return;
-
-    if (enteredKey !== post.secret_key) {
-      alert('Incorrect secret key! Deletion cancelled.');
-      return;
-    }
-
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      alert(`Error deleting post: ${error.message}`);
-    } else {
-      navigate('/');
-    }
   }
 
   // Adding new comment with secret key
@@ -102,34 +135,23 @@ export default function PostDetail() {
     }
   }
 
-  // Deleting a comment using secret key verification
-  async function handleDeleteComment(commentId, originalKey) {
-    const userKey = window.prompt('Enter your secret key to delete this comment:');
-
-    if (!userKey) return;
-
-    if (userKey !== originalKey) {
-      alert('Incorrect secret key! You can only delete your own comments.');
-      return;
-    }
-
-    const { error } = await supabase
-      .from('comments')
-      .delete()
-      .eq('id', commentId);
-
-    if (error) {
-      alert(`Error deleting comment: ${error.message}`);
-    } else {
-      setComments(comments.filter(c => c.id !== commentId));
-    }
-  }
-
   if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Unboxing post details... ✨</div>;
   if (!post) return <div style={{ textAlign: 'center', padding: '60px' }}>Post not found!</div>;
 
   return (
     <div style={{ maxWidth: '750px', margin: '0 auto', padding: '20px 20px 60px' }}>
+      {/* Secret Key Custom Modal Component */}
+      <SecretKeyModal
+        isOpen={isModalOpen}
+        title={
+          modalAction === 'DELETE_POST'
+            ? 'Enter your secret key to delete this post:'
+            : 'Enter your secret key to delete your comment:'
+        }
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+      />
+
       {/* Breadcrumb Navigation */}
       <div style={{ marginBottom: '20px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
         <Link to="/" style={{ color: 'var(--purple-accent)', textDecoration: 'none' }}>Home</Link>
@@ -166,7 +188,7 @@ export default function PostDetail() {
 
             {/* Delete Icon Button */}
             <button
-              onClick={handleDeletePost}
+              onClick={triggerPostDelete}
               style={{
                 width: '38px',
                 height: '38px',
@@ -283,7 +305,7 @@ export default function PostDetail() {
 
                 {/* Individual Comment Delete Button */}
                 <button
-                  onClick={() => handleDeleteComment(comment.id, comment.secret_key)}
+                  onClick={() => triggerCommentDelete(comment.id, comment.secret_key)}
                   style={{
                     background: 'none',
                     border: 'none',
