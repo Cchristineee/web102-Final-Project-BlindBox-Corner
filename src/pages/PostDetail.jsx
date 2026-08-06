@@ -8,6 +8,7 @@ export default function PostDetail() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [commentSecretKey, setCommentSecretKey] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export default function PostDetail() {
   async function fetchPostAndComments() {
     setLoading(true);
 
-    // Fetching the post data
+    // Fetching post data
     const { data: postData, error } = await supabase
       .from('posts')
       .select('*')
@@ -30,7 +31,7 @@ export default function PostDetail() {
       setPost(postData);
     }
 
-    // Fetching the comments for the post
+    // Fetching comments for the post
     const { data: commentsData } = await supabase
       .from('comments')
       .select('*')
@@ -41,7 +42,7 @@ export default function PostDetail() {
     setLoading(false);
   }
 
-  // Handling the upvote functionality
+  // Handling upvotes
   async function handleUpvote() {
     const updatedCount = (post.upvotes || 0) + 1;
     setPost({ ...post, upvotes: updatedCount });
@@ -52,10 +53,16 @@ export default function PostDetail() {
       .eq('id', id);
   }
 
-  // Handling direct deletion from post page
+  // Direct post deletion requiring secret key prompt
   async function handleDeletePost() {
-    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
-    if (!confirmDelete) return;
+    const enteredKey = window.prompt('Enter the secret key to delete this post:');
+    
+    if (!enteredKey) return;
+
+    if (enteredKey !== post.secret_key) {
+      alert('Incorrect secret key! Deletion cancelled.');
+      return;
+    }
 
     const { error } = await supabase
       .from('posts')
@@ -69,19 +76,52 @@ export default function PostDetail() {
     }
   }
 
-  // Adding new comment to the post
+  // Adding new comment with secret key
   async function handleAddComment(e) {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!newComment.trim() || !commentSecretKey) {
+      alert('Please enter a comment and a secret key.');
+      return;
+    }
 
     const { data, error } = await supabase
       .from('comments')
-      .insert([{ post_id: id, text: newComment.trim() }])
+      .insert([{ 
+        post_id: id, 
+        text: newComment.trim(),
+        secret_key: commentSecretKey 
+      }])
       .select();
 
     if (!error && data) {
       setComments([...comments, data[0]]);
       setNewComment('');
+      setCommentSecretKey('');
+    } else if (error) {
+      alert(`Error adding comment: ${error.message}`);
+    }
+  }
+
+  // Deleting a comment using secret key verification
+  async function handleDeleteComment(commentId, originalKey) {
+    const userKey = window.prompt('Enter your secret key to delete this comment:');
+
+    if (!userKey) return;
+
+    if (userKey !== originalKey) {
+      alert('Incorrect secret key! You can only delete your own comments.');
+      return;
+    }
+
+    const { error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (error) {
+      alert(`Error deleting comment: ${error.message}`);
+    } else {
+      setComments(comments.filter(c => c.id !== commentId));
     }
   }
 
@@ -98,12 +138,12 @@ export default function PostDetail() {
 
       {/* Main Post Container Card */}
       <div style={{ background: '#FFF', padding: '40px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)' }}>
-        {/* Flag Badge & Action Buttons Header */}
+        {/* Flag Badge & Actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           {post.flag ? <span className="flag-badge">{post.flag}</span> : <div />}
           
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {/* Edit Icon Button (Navigates to /edit/:id) */}
+            {/* Edit Icon Button */}
             <Link 
               to={`/edit/${post.id}`} 
               style={{
@@ -124,7 +164,7 @@ export default function PostDetail() {
               ✏️
             </Link>
 
-            {/* Delete Icon Button (Deletes directly) */}
+            {/* Delete Icon Button */}
             <button
               onClick={handleDeletePost}
               style={{
@@ -144,7 +184,7 @@ export default function PostDetail() {
               🗑️
             </button>
 
-            {/* Upvote Pill Button */}
+            {/* Upvote Button */}
             <button 
               onClick={handleUpvote} 
               style={{ 
@@ -198,25 +238,63 @@ export default function PostDetail() {
             Comments ({comments.length})
           </h3>
 
-          <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-            <input
-              type="text"
-              placeholder="Leave a comment (e.g., 'Awesome pull!')..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              style={{ flex: 1, padding: '12px 16px', borderRadius: '999px', border: '1px solid var(--border-light)', outline: 'none' }}
-            />
-            <button type="submit" className="btn-primary" style={{ padding: '10px 20px' }}>Post</button>
+          {/* Form with Comment Text & Secret Key */}
+          <form onSubmit={handleAddComment} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input
+                type="text"
+                placeholder="Leave a comment (e.g., 'Awesome pull!')..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                style={{ flex: 2, padding: '12px 16px', borderRadius: '999px', border: '1px solid var(--border-light)', outline: 'none' }}
+              />
+              <input
+                type="password"
+                placeholder="Secret key..."
+                value={commentSecretKey}
+                onChange={(e) => setCommentSecretKey(e.target.value)}
+                style={{ flex: 1, padding: '12px 16px', borderRadius: '999px', border: '1px solid var(--border-light)', outline: 'none' }}
+              />
+              <button type="submit" className="btn-primary" style={{ padding: '10px 24px' }}>Post</button>
+            </div>
           </form>
 
           {/* Comments List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {comments.map((comment) => (
-              <div key={comment.id} style={{ background: '#FFFBF5', padding: '14px 18px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-                <p style={{ margin: '0 0 4px 0', fontSize: '0.95rem' }}>{comment.text}</p>
-                <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                  {new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </small>
+              <div 
+                key={comment.id} 
+                style={{ 
+                  background: '#FFFBF5', 
+                  padding: '14px 18px', 
+                  borderRadius: '12px', 
+                  border: '1px solid var(--border-light)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <div>
+                  <p style={{ margin: '0 0 4px 0', fontSize: '0.95rem' }}>{comment.text}</p>
+                  <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                    {new Date(comment.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </small>
+                </div>
+
+                {/* Individual Comment Delete Button */}
+                <button
+                  onClick={() => handleDeleteComment(comment.id, comment.secret_key)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    opacity: 0.6
+                  }}
+                  title="Delete Comment"
+                >
+                  🗑️
+                </button>
               </div>
             ))}
           </div>
