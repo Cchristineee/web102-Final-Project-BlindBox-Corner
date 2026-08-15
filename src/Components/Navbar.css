@@ -42,6 +42,13 @@
   color: var(--coral-accent, #E56B6F);
 }
 
+/* Navigation Actions Wrapper */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* + New Post Button */
 .btn-new-post {
   background-color: var(--purple-accent, #B17DFF);
@@ -57,4 +64,59 @@
 
 .btn-new-post:hover {
   background-color: var(--purple-hover, #9E62FF);
+}
+
+/* User Auth Group */
+.user-auth-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* User Email Badge */
+.user-email-badge {
+  background-color: var(--purple-light, #F2E8FF);
+  color: var(--purple-accent, #B17DFF);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Log Out Button */
+.btn-logout {
+  background-color: #FFF0F3;
+  color: var(--coral-accent, #E56B6F);
+  border: 1px solid #FFD1D7;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-logout:hover {
+  background-color: #FFE2E6;
+}
+
+/* Log In / Sign Up Link */
+.btn-auth-link {
+  color: var(--purple-accent, #B17DFF);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light, #F0E6EE);
+  background-color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.btn-auth-link:hover {
+  background-color: var(--purple-light, #F2E8FF);
 }
