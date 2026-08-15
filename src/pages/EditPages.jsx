@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../client';
 
-// EditPost component for editing an existing post
 export default function EditPost() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,45 +10,47 @@ export default function EditPost() {
   const [flag, setFlag] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [postSecretKey, setPostSecretKey] = useState(''); 
-  const [inputSecretKey, setInputSecretKey] = useState('');
   const [loading, setLoading] = useState(true);
 
   const flags = ['✨ Secret Found', '📦 Haul Showcase', '🔍 ISO / Trade', '🎀 Display Setup', '❓ Question'];
 
   useEffect(() => {
-    fetchPost();
+    fetchPostAndCheckAuth();
   }, [id]);
 
-  async function fetchPost() {
+  async function fetchPostAndCheckAuth() {
     setLoading(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { data: postData, error } = await supabase
       .from('posts')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (error) {
-      console.error('Error fetching post:', error.message);
-    } else if (postData) {
-      setTitle(postData.title || '');
-      setFlag(postData.flag || '');
-      setContent(postData.content || '');
-      setImageUrl(postData.image_url || '');
-      setPostSecretKey(postData.secret_key || '');
+    if (error || !postData) {
+      console.error('Error fetching post:', error?.message);
+      navigate('/');
+      return;
     }
+
+    // Redirect if not the author
+    if (!user || user.id !== postData.user_id) {
+      alert('You do not have permission to edit this post.');
+      navigate(`/post/${id}`);
+      return;
+    }
+
+    setTitle(postData.title || '');
+    setFlag(postData.flag || '');
+    setContent(postData.content || '');
+    setImageUrl(postData.image_url || '');
     setLoading(false);
   }
 
-  // Handling update to post 
   async function handleUpdate(e) {
     e.preventDefault();
-
-    // Verify secret key input against the state
-    if (inputSecretKey !== postSecretKey) {
-      alert('Incorrect secret key! You do not have permission to edit this post.');
-      return;
-    }
 
     const { error } = await supabase
       .from('posts')
@@ -68,14 +69,9 @@ export default function EditPost() {
     }
   }
 
-  // Handling deletion of post
   async function handleDelete() {
-    const enteredKey = window.prompt('Enter your secret key to confirm post deletion:');
-    
-    if (enteredKey !== postSecretKey) {
-      alert('Incorrect secret key! Deletion cancelled.');
-      return;
-    }
+    const confirmDelete = window.confirm('Are you sure you want to delete this post?');
+    if (!confirmDelete) return;
 
     const { error } = await supabase
       .from('posts')
