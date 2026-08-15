@@ -8,42 +8,53 @@ export default function CreatePost() {
   const [flag, setFlag] = useState('');
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [secretKey, setSecretKey] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const flags = ['✨ Secret Found', '📦 Haul Showcase', '🔍 ISO / Trade', '🎀 Display Setup', '❓ Question'];
 
-  // Submit handler for creating a new post
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!title || !flag || !secretKey) {
-      alert('Please fill in all required fields, including your secret key.');
+    if (!title || !flag) {
+      alert('Please fill in the required fields.');
       return;
     }
-    // Checking if the secretKey is present alongside title and flag
-    console.log('Sending post data to Supabase...', { title, flag, content, image_url: imageUrl });
-  
-    if (!title || !flag) {
-        alert('Please fill in the required fields.');
-        return;
-        }
-        console.log('Sending post data to Supabase...', { title, flag, content, image_url: imageUrl });
 
-        const { data, error } = await supabase
-            .from('posts')
-            .insert([{ 
-                title, flag, content, image_url: imageUrl, secret_key: secretKey, upvotes: 0 }
-             ])
-             .select();
-        
-    if (error) {
-      console.error('Supabase Insert Error:', error.message, error.details);
-      alert((`Failed to create post: ${error.message}`));
-    } else {
-        console.log('Post created successfully:', data);
-        navigate('/');
+    setLoading(true);
+
+    // 1. Get current authenticated user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert('You must be logged in to create a post!');
+      setLoading(false);
+      return;
     }
- }
+
+    // 2. Insert post with authenticated user_id
+    const { data, error } = await supabase
+      .from('posts')
+      .insert([
+        {
+          title,
+          flag,
+          content,
+          image_url: imageUrl,
+          user_id: user.id,
+          upvotes: 0
+        }
+      ])
+      .select();
+
+    setLoading(false);
+
+    if (error) {
+      console.error('Supabase Insert Error:', error.message);
+      alert(`Failed to create post: ${error.message}`);
+    } else {
+      navigate('/');
+    }
+  }
 
   return (
     <div style={{ maxWidth: '650px', margin: '0 auto', padding: '20px 20px 60px' }}>
@@ -103,19 +114,9 @@ export default function CreatePost() {
           />
         </div>
 
-        <div style={{ marginBottom: '28px' }}>
-          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Secret Key * <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(used to edit or delete later)</span></label>
-          <input
-            type="password"
-            required
-            placeholder="Create a secret key or PIN..."
-            value={secretKey}
-            onChange={(e) => setSecretKey(e.target.value)}
-            style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-light)', outline: 'none' }}
-          />
-        </div>
-
-        <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px' }}>Create Post</button>
+        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', padding: '14px' }}>
+          {loading ? 'Creating...' : 'Create Post'}
+        </button>
       </form>
     </div>
   );
