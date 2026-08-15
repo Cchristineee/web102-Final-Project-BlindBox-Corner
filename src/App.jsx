@@ -6,6 +6,7 @@ import CreatePost from './pages/CreatePost'
 import Navbar from './Components/Navbar'
 import EditPost from './pages/EditPages'
 import PostDetail from './pages/PostDetail'
+import Auth from './pages/Auth'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/create" element={<CreatePost />} />
         <Route path="/edit/:id" element={<EditPost />} />
         <Route path="/post/:id" element={<PostDetail />} />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </BrowserRouter>
   )
